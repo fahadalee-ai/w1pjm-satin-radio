@@ -10,33 +10,202 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as HomeRouteImport } from './routes/home'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as NewsRouteImport } from './routes/news'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as RegisterRouteImport } from './routes/register'
+import { Route as ScheduleRouteImport } from './routes/schedule'
+import { Route as NewsIdRouteImport } from './routes/news.$id'
+import { Route as ProfileContactRouteImport } from './routes/profile.contact'
+import { Route as ProfileFavoritesRouteImport } from './routes/profile.favorites'
+import { Route as ProfileNotificationsRouteImport } from './routes/profile.notifications'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HomeRoute = HomeRouteImport.update({
+  id: '/home',
+  path: '/home',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NewsRoute = NewsRouteImport.update({
+  id: '/news',
+  path: '/news',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ScheduleRoute = ScheduleRouteImport.update({
+  id: '/schedule',
+  path: '/schedule',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NewsIdRoute = NewsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => NewsRoute,
+} as any)
+const ProfileContactRoute = ProfileContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => ProfileRoute,
+} as any)
+const ProfileFavoritesRoute = ProfileFavoritesRouteImport.update({
+  id: '/favorites',
+  path: '/favorites',
+  getParentRoute: () => ProfileRoute,
+} as any)
+const ProfileNotificationsRoute = ProfileNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => ProfileRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/auth': typeof AuthRoute
+  '/home': typeof HomeRoute
+  '/login': typeof LoginRoute
+  '/news': typeof NewsRouteWithChildren
+  '/onboarding': typeof OnboardingRoute
+  '/profile': typeof ProfileRouteWithChildren
+  '/register': typeof RegisterRoute
+  '/schedule': typeof ScheduleRoute
+  '/news/$id': typeof NewsIdRoute
+  '/profile/contact': typeof ProfileContactRoute
+  '/profile/favorites': typeof ProfileFavoritesRoute
+  '/profile/notifications': typeof ProfileNotificationsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/auth': typeof AuthRoute
+  '/home': typeof HomeRoute
+  '/login': typeof LoginRoute
+  '/news': typeof NewsRouteWithChildren
+  '/onboarding': typeof OnboardingRoute
+  '/profile': typeof ProfileRouteWithChildren
+  '/register': typeof RegisterRoute
+  '/schedule': typeof ScheduleRoute
+  '/news/$id': typeof NewsIdRoute
+  '/profile/contact': typeof ProfileContactRoute
+  '/profile/favorites': typeof ProfileFavoritesRoute
+  '/profile/notifications': typeof ProfileNotificationsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/auth': typeof AuthRoute
+  '/home': typeof HomeRoute
+  '/login': typeof LoginRoute
+  '/news': typeof NewsRouteWithChildren
+  '/onboarding': typeof OnboardingRoute
+  '/profile': typeof ProfileRouteWithChildren
+  '/register': typeof RegisterRoute
+  '/schedule': typeof ScheduleRoute
+  '/news/$id': typeof NewsIdRoute
+  '/profile/contact': typeof ProfileContactRoute
+  '/profile/favorites': typeof ProfileFavoritesRoute
+  '/profile/notifications': typeof ProfileNotificationsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/auth'
+    | '/home'
+    | '/login'
+    | '/news'
+    | '/onboarding'
+    | '/profile'
+    | '/register'
+    | '/schedule'
+    | '/news/$id'
+    | '/profile/contact'
+    | '/profile/favorites'
+    | '/profile/notifications'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/about'
+    | '/auth'
+    | '/home'
+    | '/login'
+    | '/news'
+    | '/onboarding'
+    | '/profile'
+    | '/register'
+    | '/schedule'
+    | '/news/$id'
+    | '/profile/contact'
+    | '/profile/favorites'
+    | '/profile/notifications'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/auth'
+    | '/home'
+    | '/login'
+    | '/news'
+    | '/onboarding'
+    | '/profile'
+    | '/register'
+    | '/schedule'
+    | '/news/$id'
+    | '/profile/contact'
+    | '/profile/favorites'
+    | '/profile/notifications'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
+  AuthRoute: typeof AuthRoute
+  HomeRoute: typeof HomeRoute
+  LoginRoute: typeof LoginRoute
+  NewsRoute: typeof NewsRouteWithChildren
+  OnboardingRoute: typeof OnboardingRoute
+  ProfileRoute: typeof ProfileRouteWithChildren
+  RegisterRoute: typeof RegisterRoute
+  ScheduleRoute: typeof ScheduleRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +217,136 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/home': {
+      id: '/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof HomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/news': {
+      id: '/news'
+      path: '/news'
+      fullPath: '/news'
+      preLoaderRoute: typeof NewsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/schedule': {
+      id: '/schedule'
+      path: '/schedule'
+      fullPath: '/schedule'
+      preLoaderRoute: typeof ScheduleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/news/$id': {
+      id: '/news/$id'
+      path: '/$id'
+      fullPath: '/news/$id'
+      preLoaderRoute: typeof NewsIdRouteImport
+      parentRoute: typeof NewsRoute
+    }
+    '/profile/contact': {
+      id: '/profile/contact'
+      path: '/contact'
+      fullPath: '/profile/contact'
+      preLoaderRoute: typeof ProfileContactRouteImport
+      parentRoute: typeof ProfileRoute
+    }
+    '/profile/favorites': {
+      id: '/profile/favorites'
+      path: '/favorites'
+      fullPath: '/profile/favorites'
+      preLoaderRoute: typeof ProfileFavoritesRouteImport
+      parentRoute: typeof ProfileRoute
+    }
+    '/profile/notifications': {
+      id: '/profile/notifications'
+      path: '/notifications'
+      fullPath: '/profile/notifications'
+      preLoaderRoute: typeof ProfileNotificationsRouteImport
+      parentRoute: typeof ProfileRoute
+    }
   }
 }
 
+interface NewsRouteChildren {
+  NewsIdRoute: typeof NewsIdRoute
+}
+
+const NewsRouteChildren: NewsRouteChildren = {
+  NewsIdRoute: NewsIdRoute,
+}
+
+const NewsRouteWithChildren = NewsRoute._addFileChildren(NewsRouteChildren)
+
+interface ProfileRouteChildren {
+  ProfileContactRoute: typeof ProfileContactRoute
+  ProfileFavoritesRoute: typeof ProfileFavoritesRoute
+  ProfileNotificationsRoute: typeof ProfileNotificationsRoute
+}
+
+const ProfileRouteChildren: ProfileRouteChildren = {
+  ProfileContactRoute: ProfileContactRoute,
+  ProfileFavoritesRoute: ProfileFavoritesRoute,
+  ProfileNotificationsRoute: ProfileNotificationsRoute,
+}
+
+const ProfileRouteWithChildren =
+  ProfileRoute._addFileChildren(ProfileRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
+  AuthRoute: AuthRoute,
+  HomeRoute: HomeRoute,
+  LoginRoute: LoginRoute,
+  NewsRoute: NewsRouteWithChildren,
+  OnboardingRoute: OnboardingRoute,
+  ProfileRoute: ProfileRouteWithChildren,
+  RegisterRoute: RegisterRoute,
+  ScheduleRoute: ScheduleRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -35,56 +35,56 @@
   --color-danger: var(--danger);
   --color-ink: var(--ink);
   --color-surface: var(--surface);
+  --color-gold: var(--gold);
+  --color-maroon: var(--maroon);
+  --color-rose: var(--rose);
   --color-border: var(--border-light);
   --color-border-dark: var(--border-dark);
   --color-input: var(--border-light);
-  --color-ring: var(--primary);
+  --color-ring: var(--gold);
 
-  --font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
 }
 
 :root {
   --radius: 4px;
-  --brand-blue: #1b75ba;
-  --brand-orange: #f05a2a;
-  --status-success: #3b9e63;
-  --status-warning: #f05a2a;
-  --status-error: #e24b4a;
-
-  --primary: #1b75ba;
-  --primary-foreground: #f5f5f5;
-  --primary-dark: #155d94;
-  --accent: #f05a2a;
-  --accent-foreground: #f5f5f5;
-  --ink: #0f1115;
-  --surface: #1a1d23;
-  --background: #0f1115;
-  --foreground: #f5f5f5;
-  --card: #1a1d23;
-  --card-foreground: #f5f5f5;
-  --popover: #1a1d23;
-  --popover-foreground: #f5f5f5;
-  --secondary: #1a1d23;
-  --secondary-foreground: #f5f5f5;
-  --muted: #23262e;
-  --muted-foreground: #9ca3af;
-  --dim: #6b7280;
-  --destructive: #e24b4a;
-  --destructive-foreground: #f5f5f5;
-  --success: #3b9e63;
-  --warning: #f05a2a;
-  --danger: #e24b4a;
-  --border-light: rgba(255, 255, 255, 0.08);
-  --border-dark: rgba(255, 255, 255, 0.08);
-  --sidebar: #1a1d23;
-  --sidebar-foreground: #f5f5f5;
-  --sidebar-primary: #1b75ba;
-  --sidebar-primary-foreground: #f5f5f5;
-  --sidebar-accent: #23262e;
-  --sidebar-accent-foreground: #f5f5f5;
-  --sidebar-border: rgba(255, 255, 255, 0.08);
-  --sidebar-ring: #1b75ba;
+  --maroon: #3b0410;
+  --gold: #facd05;
+  --surface: #4a0917;
+  --rose: #e8c9ce;
+  --primary: #facd05;
+  --primary-foreground: #3b0410;
+  --primary-dark: #e0b804;
+  --accent: #facd05;
+  --accent-foreground: #3b0410;
+  --ink: #3b0410;
+  --background: #3b0410;
+  --foreground: #ffffff;
+  --card: #4a0917;
+  --card-foreground: #ffffff;
+  --popover: #4a0917;
+  --popover-foreground: #ffffff;
+  --secondary: #4a0917;
+  --secondary-foreground: #ffffff;
+  --muted: #5c1420;
+  --muted-foreground: #e8c9ce;
+  --dim: #c4a0a6;
+  --destructive: #c45c68;
+  --destructive-foreground: #ffffff;
+  --success: #facd05;
+  --warning: #facd05;
+  --danger: #c45c68;
+  --border-light: rgba(92, 20, 32, 0.85);
+  --border-dark: #5c1420;
+  --sidebar: #3b0410;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #facd05;
+  --sidebar-primary-foreground: #3b0410;
+  --sidebar-accent: #4a0917;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #5c1420;
+  --sidebar-ring: #facd05;
 }
 
 @layer base {
@@ -98,6 +98,12 @@
     color: var(--foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    scrollbar-width: none;
+  }
+
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    display: none;
   }
 
   h1,
@@ -106,15 +112,23 @@
   h4,
   .font-display {
     font-family: var(--font-display);
-    font-weight: 600;
-    letter-spacing: -0.01em;
-    line-height: 1.2;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    line-height: 1.05;
+    text-transform: uppercase;
   }
 
   input,
   textarea,
   select {
     color-scheme: dark;
+  }
+
+  button,
+  a,
+  input,
+  textarea {
+    -webkit-tap-highlight-color: transparent;
   }
 }
 
@@ -125,11 +139,47 @@
   }
 }
 
-@keyframes splash-bar {
-  0% {
-    transform: translateX(-100%);
+@keyframes eq-bar {
+  from {
+    transform: scaleY(0.28);
   }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes live-pulse {
+  0%,
   100% {
-    transform: translateX(280%);
+    opacity: 1;
+    transform: scale(1);
   }
+  50% {
+    opacity: 0.35;
+    transform: scale(0.72);
+  }
+}
+
+@keyframes skeleton-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+.eq-bar {
+  transform-origin: bottom;
+  animation: eq-bar ease-in-out infinite alternate;
+}
+
+.live-dot {
+  animation: live-pulse 1.4s ease-in-out infinite;
+}
+
+.skeleton {
+  background: #4a0917;
+  animation: skeleton-pulse 1.3s ease-in-out infinite;
 }

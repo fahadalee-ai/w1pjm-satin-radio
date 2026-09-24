@@ -84,14 +84,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         name: "viewport",
         content: "width=device-width, initial-scale=1, viewport-fit=cover",
       },
-      { title: "Mobile App Starter" },
+      { title: "W1PJM Satin Radio" },
       {
         name: "description",
-        content: "Clean mobile app starter. This is the starting point for a new project.",
+        content: "The true voice of Cape Cod. Listen live to W1PJM Home Town Radio Station.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "theme-color", content: "#f7f7f8" },
+      { name: "theme-color", content: "#3B0410" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },

@@ -1,248 +1,247 @@
-import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
-import { clearStorage, readStorage, writeStorage } from "./storage";
-import {
-  seedActivity,
-  seedCompliance,
-  seedDocuments,
-  seedFieldwork,
-  seedForms,
-  seedNotifications,
-  seedSupervisor,
-  seedTemplates,
-  seedUsers,
-  type ActivityItem,
-  type AppDocument,
-  type AppNotification,
-  type ComplianceItem,
-  type FieldworkEntry,
-  type FormRecord,
-  type FormTemplate,
-  type Role,
-  type SupervisionSession,
-  type Supervisor,
-  type User,
-  seedSupervision,
-} from "./mock-data";
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { seedListeners, type Listener } from "./mock-data";
+import { clearStorage, readJson, readStorage, writeJson, writeStorage } from "./storage";
 
 export type Toast = { id: number; title: string; body?: string };
 
-type Prefs = {
-  "Supervision reminders": boolean;
-  "Compliance deadlines": boolean;
-  "Document expirations": boolean;
-  "Pending approvals": boolean;
+export type Prefs = {
+  breakingNews: boolean;
+  showReminders: boolean;
 };
 
 type Store = {
-  users: User[];
-  user: User | null;
+  hydrated: boolean;
+  users: Listener[];
+  user: Listener | null;
+  guest: boolean;
   onboarded: boolean;
+  playing: boolean;
+  started: boolean;
+  volume: number;
+  favorites: string[];
+  reminders: string[];
+  prefs: Prefs;
+  toasts: Toast[];
   markOnboarded: () => void;
-  login: (email: string, password: string) => { ok: true } | { ok: false; reason: "invalid" | "admin" };
+  login: (emailOrPhone: string, password: string) => { ok: true };
   register: (input: {
-    firstName: string;
-    lastName: string;
+    name: string;
     email: string;
     phone: string;
-    bacbNumber?: string;
     password: string;
-    role: Role;
-  }) => { ok: true; email: string } | { ok: false; reason: "exists" };
+    alerts: boolean;
+  }) => { ok: true };
+  loginSocial: (provider: "apple" | "google") => void;
+  continueAsGuest: () => void;
   logout: () => void;
-  updateUser: (patch: Partial<User>) => void;
-  supervisor: Supervisor;
-  fieldwork: FieldworkEntry[];
-  addFieldwork: (entry: Omit<FieldworkEntry, "id" | "status">) => void;
-  updateFieldwork: (id: string, patch: Partial<FieldworkEntry>) => void;
-  removeFieldwork: (id: string) => void;
-  supervision: SupervisionSession[];
-  addSupervision: (entry: Omit<SupervisionSession, "id">) => void;
-  compliance: ComplianceItem[];
-  toggleRemind: (id: string) => void;
-  documents: AppDocument[];
-  addDocument: (doc: Omit<AppDocument, "id" | "status" | "uploadedAt"> & { status?: AppDocument["status"] }) => void;
-  replaceDocument: (id: string, name: string) => void;
-  removeDocument: (id: string) => void;
-  templates: FormTemplate[];
-  forms: FormRecord[];
-  submitForm: (record: Omit<FormRecord, "id" | "status" | "submittedAt">) => void;
-  notifications: AppNotification[];
-  markAllRead: () => void;
-  markNotificationRead: (id: string) => void;
-  activity: ActivityItem[];
-  prefs: Prefs;
+  updateUser: (patch: Partial<Pick<Listener, "name" | "phone" | "alerts">>) => void;
+  togglePlay: () => void;
+  setVolume: (value: number) => void;
+  toggleFavorite: (showId: string) => boolean;
+  toggleReminder: (showId: string) => boolean;
   togglePref: (key: keyof Prefs) => void;
-  toasts: Toast[];
   pushToast: (title: string, body?: string) => void;
   dismissToast: (id: number) => void;
 };
 
 const Ctx = createContext<Store | null>(null);
 
-const DEFAULT_PREFS: Prefs = {
-  "Supervision reminders": true,
-  "Compliance deadlines": true,
-  "Document expirations": true,
-  "Pending approvals": true,
-};
-
-function loadSessionUser(users: User[]): User | null {
-  const id = readStorage("session");
-  if (!id) return null;
-  return users.find((u) => u.id === id) ?? null;
-}
+const DEFAULT_PREFS: Prefs = { breakingNews: true, showReminders: true };
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [users, setUsers] = useState<User[]>(seedUsers);
-  const [user, setUser] = useState<User | null>(() => loadSessionUser(seedUsers));
-  const [onboarded, setOnboarded] = useState(() => readStorage("onboarded") === "1");
-  const [fieldwork, setFieldwork] = useState(seedFieldwork);
-  const [supervision, setSupervision] = useState(seedSupervision);
-  const [compliance, setCompliance] = useState(seedCompliance);
-  const [documents, setDocuments] = useState(seedDocuments);
-  const [forms, setForms] = useState(seedForms);
-  const [notifications, setNotifications] = useState(seedNotifications);
-  const [activity, setActivity] = useState(seedActivity);
+  const [hydrated, setHydrated] = useState(false);
+  const [users, setUsers] = useState<Listener[]>(seedListeners);
+  const [user, setUser] = useState<Listener | null>(null);
+  const [guest, setGuest] = useState(false);
+  const [onboarded, setOnboarded] = useState(false);
+  const [playing, setPlaying] = useState(false);
+  const [started, setStarted] = useState(false);
+  const [volume, setVolumeState] = useState(0.8);
+  const [favorites, setFavorites] = useState<string[]>([]);
+  const [reminders, setReminders] = useState<string[]>([]);
   const [prefs, setPrefs] = useState<Prefs>(DEFAULT_PREFS);
   const [toasts, setToasts] = useState<Toast[]>([]);
+
+  useEffect(() => {
+    const storedUsers = readJson<Listener[]>("users") ?? seedListeners;
+    const session = readStorage("session");
+    const found = storedUsers.find((u) => u.id === session) ?? null;
+    setUsers(storedUsers);
+    setUser(found);
+    setGuest(!found && readStorage("guest") === "1");
+    setOnboarded(readStorage("onboarded") === "1" || !!found);
+    setFavorites(readJson<string[]>("favorites") ?? []);
+    setReminders(readJson<string[]>("reminders") ?? []);
+    setPrefs(readJson<Prefs>("prefs") ?? DEFAULT_PREFS);
+    const storedVolume = readStorage("volume");
+    if (storedVolume) setVolumeState(Number(storedVolume) || 0.8);
+    setHydrated(true);
+  }, []);
 
   const value = useMemo<Store>(() => {
     const pushToast = (title: string, body?: string) => {
       const id = Date.now() + Math.random();
-      setToasts((t) => [...t, { id, title, body }]);
-      setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 3200);
+      setToasts((list) => [...list, { id, title, body }]);
+      setTimeout(() => setToasts((list) => list.filter((item) => item.id !== id)), 3200);
+    };
+
+    const persistUser = (next: Listener | null, list?: Listener[]) => {
+      setUser(next);
+      if (list) {
+        setUsers(list);
+        writeJson("users", list);
+      }
+      if (next) {
+        writeStorage("session", next.id);
+        clearStorage("guest");
+        setGuest(false);
+      }
     };
 
     return {
+      hydrated,
       users,
       user,
+      guest,
       onboarded,
+      playing,
+      started,
+      volume,
+      favorites,
+      reminders,
+      prefs,
+      toasts,
       markOnboarded: () => {
         setOnboarded(true);
         writeStorage("onboarded", "1");
       },
-      login: (email, password) => {
-        const found = users.find((u) => u.email.toLowerCase() === email.trim().toLowerCase());
-        if (!found || found.password !== password) return { ok: false, reason: "invalid" };
-        if (found.role === "admin") return { ok: false, reason: "admin" };
-        setUser(found);
-        writeStorage("session", found.id);
+      login: (emailOrPhone, password) => {
+        const key = emailOrPhone.trim().toLowerCase();
+        const found = key
+          ? users.find(
+              (u) => u.email.toLowerCase() === key || u.phone.replace(/\D/g, "") === key.replace(/\D/g, ""),
+            )
+          : undefined;
+        if (found) {
+          persistUser(found);
+        } else {
+          const typed = emailOrPhone.trim();
+          const created: Listener = {
+            id: `u${Date.now()}`,
+            name: typed || "Listener",
+            email: typed.includes("@") ? typed.toLowerCase() : typed ? `${typed.replace(/\s/g, "")}@w1pjm.com` : "listener@w1pjm.com",
+            phone: typed.includes("@") ? "" : typed,
+            password,
+            alerts: true,
+          };
+          persistUser(created, [...users, created]);
+        }
         writeStorage("onboarded", "1");
         setOnboarded(true);
         return { ok: true };
       },
       register: (input) => {
-        if (users.some((u) => u.email.toLowerCase() === input.email.trim().toLowerCase())) {
-          return { ok: false, reason: "exists" };
-        }
-        const created: User = {
+        const email = input.email.trim().toLowerCase() || `listener${Date.now()}@w1pjm.com`;
+        const created: Listener = {
           id: `u${Date.now()}`,
-          firstName: input.firstName.trim(),
-          lastName: input.lastName.trim(),
-          email: input.email.trim().toLowerCase(),
+          name: input.name.trim() || "Listener",
+          email,
           phone: input.phone.trim(),
           password: input.password,
-          role: input.role,
-          bacbNumber: input.bacbNumber?.trim() || undefined,
+          alerts: input.alerts,
         };
-        setUsers((list) => [...list, created]);
+        const list = [...users, created];
+        persistUser(created, list);
         writeStorage("onboarded", "1");
         setOnboarded(true);
-        return { ok: true, email: created.email };
+        if (input.alerts) {
+          const next = { ...prefs, breakingNews: true, showReminders: true };
+          setPrefs(next);
+          writeJson("prefs", next);
+        }
+        return { ok: true };
+      },
+      loginSocial: (provider) => {
+        const email = provider === "apple" ? "listener@icloud.com" : "listener@gmail.com";
+        const existing = users.find((u) => u.email === email);
+        if (existing) {
+          persistUser(existing);
+        } else {
+          const created: Listener = {
+            id: `u${Date.now()}`,
+            name: provider === "apple" ? "Apple Listener" : "Google Listener",
+            email,
+            phone: "",
+            password: "",
+            alerts: false,
+          };
+          persistUser(created, [...users, created]);
+        }
+        writeStorage("onboarded", "1");
+        setOnboarded(true);
+      },
+      continueAsGuest: () => {
+        setUser(null);
+        setGuest(true);
+        clearStorage("session");
+        writeStorage("guest", "1");
+        writeStorage("onboarded", "1");
+        setOnboarded(true);
       },
       logout: () => {
         setUser(null);
+        setGuest(false);
+        setPlaying(false);
+        setStarted(false);
         clearStorage("session");
+        clearStorage("guest");
       },
       updateUser: (patch) => {
         if (!user) return;
         const next = { ...user, ...patch };
+        const list = users.map((u) => (u.id === next.id ? next : u));
         setUser(next);
-        setUsers((list) => list.map((u) => (u.id === next.id ? next : u)));
+        setUsers(list);
+        writeJson("users", list);
       },
-      supervisor: seedSupervisor,
-      fieldwork,
-      addFieldwork: (entry) => {
-        const next: FieldworkEntry = { ...entry, id: `fw${Date.now()}`, status: "pending" };
-        setFieldwork((list) => [next, ...list]);
-        setActivity((list) => [
-          { id: `a${Date.now()}`, text: `Fieldwork logged — ${entry.hours.toFixed(1)} hrs`, time: "Just now", tone: "orange" },
-          ...list,
-        ]);
-        pushToast("Fieldwork entry saved");
+      togglePlay: () => {
+        setStarted(true);
+        setPlaying((on) => !on);
       },
-      updateFieldwork: (id, patch) => setFieldwork((list) => list.map((e) => (e.id === id ? { ...e, ...patch } : e))),
-      removeFieldwork: (id) => setFieldwork((list) => list.filter((e) => e.id !== id)),
-      supervision,
-      addSupervision: (entry) => {
-        setSupervision((list) => [{ ...entry, id: `sv${Date.now()}` }, ...list]);
-        pushToast(entry.status === "requested" ? "Session requested" : "Submitted for sign-off");
+      setVolume: (value) => {
+        setVolumeState(value);
+        writeStorage("volume", String(value));
       },
-      compliance,
-      toggleRemind: (id) =>
-        setCompliance((list) => list.map((c) => (c.id === id ? { ...c, remind: !c.remind } : c))),
-      documents,
-      addDocument: (doc) => {
-        const next: AppDocument = {
-          ...doc,
-          id: `doc${Date.now()}`,
-          status: doc.status ?? "pending",
-          uploadedAt: new Date().toISOString().slice(0, 10),
-        };
-        setDocuments((list) => [next, ...list]);
-        if (doc.category) {
-          setCompliance((list) =>
-            list.map((c) =>
-              c.category === doc.category
-                ? { ...c, documentId: next.id, status: "current", detail: "Pending review" }
-                : c,
-            ),
-          );
-        }
-        pushToast("Document submitted");
+      toggleFavorite: (showId) => {
+        if (!user) return false;
+        setFavorites((list) => {
+          const next = list.includes(showId) ? list.filter((id) => id !== showId) : [...list, showId];
+          writeJson("favorites", next);
+          return next;
+        });
+        return true;
       },
-      replaceDocument: (id, name) => {
-        setDocuments((list) => list.map((d) => (d.id === id ? { ...d, name, status: "pending" } : d)));
-        pushToast("Document resubmitted");
+      toggleReminder: (showId) => {
+        if (!user) return false;
+        setReminders((list) => {
+          const next = list.includes(showId) ? list.filter((id) => id !== showId) : [...list, showId];
+          writeJson("reminders", next);
+          return next;
+        });
+        pushToast("Reminder updated");
+        return true;
       },
-      removeDocument: (id) => setDocuments((list) => list.filter((d) => d.id !== id)),
-      templates: seedTemplates,
-      forms,
-      submitForm: (record) => {
-        const next: FormRecord = {
-          ...record,
-          id: `f${Date.now()}`,
-          status: "pending",
-          submittedAt: new Date().toISOString().slice(0, 10),
-        };
-        setForms((list) => [next, ...list.filter((f) => f.templateId !== record.templateId || f.status !== "todo")]);
-        pushToast("Form submitted");
+      togglePref: (key) => {
+        setPrefs((current) => {
+          const next = { ...current, [key]: !current[key] };
+          writeJson("prefs", next);
+          return next;
+        });
       },
-      notifications,
-      markAllRead: () => setNotifications((list) => list.map((n) => ({ ...n, read: true }))),
-      markNotificationRead: (id) =>
-        setNotifications((list) => list.map((n) => (n.id === id ? { ...n, read: true } : n))),
-      activity,
-      prefs,
-      togglePref: (key) => setPrefs((p) => ({ ...p, [key]: !p[key] })),
-      toasts,
       pushToast,
-      dismissToast: (id) => setToasts((t) => t.filter((x) => x.id !== id)),
+      dismissToast: (id) => setToasts((list) => list.filter((item) => item.id !== id)),
     };
-  }, [
-    users,
-    user,
-    onboarded,
-    fieldwork,
-    supervision,
-    compliance,
-    documents,
-    forms,
-    notifications,
-    activity,
-    prefs,
-    toasts,
-  ]);
+  }, [hydrated, users, user, guest, onboarded, playing, started, volume, favorites, reminders, prefs, toasts]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
