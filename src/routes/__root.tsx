@@ -84,7 +84,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         name: "viewport",
         content: "width=device-width, initial-scale=1, viewport-fit=cover",
       },
-      { title: "W1PJM Satin Radio" },
+      { title: "W1PJM Satin Radio | Home Town Radio Station" },
       {
         name: "description",
         content: "The true voice of Cape Cod. Listen live to W1PJM Home Town Radio Station.",
@@ -95,7 +95,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: asset("/favicon.ico"), type: "image/x-icon" },
+      { rel: "icon", href: asset("/favicon.png"), type: "image/png" },
+      { rel: "apple-touch-icon", href: asset("/apple-touch-icon.png") },
     ],
   }),
 

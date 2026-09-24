@@ -6,7 +6,7 @@ import { useApp } from "@/lib/store";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "W1PJM Satin Radio" },
+      { title: "W1PJM Satin Radio | Home Town Radio Station" },
       { name: "description", content: "The true voice of Cape Cod. Listen live to W1PJM Home Town Radio Station." },
     ],
   }),
